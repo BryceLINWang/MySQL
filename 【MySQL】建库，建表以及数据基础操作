@@ -1,0 +1,193 @@
+```sql
+create database mydb; -- 创建库的命令
+```
+**建表**
+```sql
+create table student(  
+  code int,   
+   name varchar(50),   
+    sex char(2), 
+       phone char(18),  
+         enter_time date 
+         ); 
+```
+**添加**
+```sql
+--添加一条学生数据
+insert into student(code,name,sex,phone,enter_time) values(1111,'张三','男','19887678767',now());
+--如果给学生表中每列均赋值则可以不用写字段列表，只写值列表
+insert into student values(1111,'张三','男','19887678767',now());
+```
+**范例表**
+```sql
+-- 删除数据表  
+DROP TABLE IF EXISTS emp ;  
+DROP TABLE IF EXISTS dept;  
+DROP TABLE IF EXISTS bonus;  
+DROP TABLE IF EXISTS salgrade;  
+  
+-- 创建数据表
+-- 员工表
+CREATE TABLE dept (  
+    deptno  INT PRIMARY KEY,  -- 部门编号
+    dname   VARCHAR(14) ,  -- 部门名称
+    loc VARCHAR(13)   -- 部门地址
+) ;  
+-- 员工表
+CREATE TABLE emp (  
+    empno   INT PRIMARY KEY,  -- 员工编号
+    ename   VARCHAR(10),  -- 员工姓名
+    job VARCHAR(9), -- 员工职务
+    mgr INT, -- 经理的员工编号
+    hiredate DATE,  -- 入职日期
+    sal DOUBLE,  -- 员工收入
+    comm DOUBLE,  -- 奖金
+    deptno  INT -- 部门表外键，代表当前员工属于哪个部门   
+);  
+alter table emp add foreign key (deptno) references dept (deptno); 
+-- 奖金表
+CREATE TABLE bonus (  
+    ename   VARCHAR(10) ,  -- 员工姓名
+    job VARCHAR(9)  ,  -- 员工职务
+    sal DOUBLE,  -- 员工收入
+    comm DOUBLE  -- 员工奖金
+) ;  
+-- 工资等级
+CREATE TABLE salgrade (   
+    grade INT,   -- 工资等级
+    losal DOUBLE,  -- 当前等级最低收入
+    hisal DOUBLE   -- 当前等级最高收入
+);  
+  
+-- 插入测试数据 —— dept  
+INSERT INTO dept VALUES (10,'ACCOUNTING','NEW YORK');  
+INSERT INTO dept VALUES (20,'RESEARCH','DALLAS');  
+INSERT INTO dept VALUES (30,'SALES','CHICAGO');  
+INSERT INTO dept VALUES (40,'OPERATIONS','BOSTON');  
+  
+-- 插入测试数据 —— emp  
+INSERT INTO emp VALUES (7369,'SMITH','CLERK',7902,str_to_date('17-12-1980','%d-%m-%Y'),800,NULL,20);  
+INSERT INTO emp VALUES (7499,'ALLEN','SALESMAN',7698,str_to_date('20-2-1981','%d-%m-%Y'),1600,300,30);  
+INSERT INTO emp VALUES (7521,'WARD','SALESMAN',7698,str_to_date('22-2-1981','%d-%m-%Y'),1250,500,30);  
+INSERT INTO emp VALUES (7566,'JONES','MANAGER',7839,str_to_date('2-4-1981','%d-%m-%Y'),2975,NULL,20);  
+INSERT INTO emp VALUES (7654,'MARTIN','SALESMAN',7698,str_to_date('28-9-1981','%d-%m-%Y'),1250,1400,30);  
+INSERT INTO emp VALUES (7698,'BLAKE','MANAGER',7839,str_to_date('1-5-1981','%d-%m-%Y'),2850,NULL,30);  
+INSERT INTO emp VALUES (7782,'CLARK','MANAGER',7839,str_to_date('9-6-1981','%d-%m-%Y'),2450,NULL,10);  
+INSERT INTO emp VALUES (7788,'SCOTT','ANALYST',7566,str_to_date('19-04-1987','%d-%m-%Y'),3000,NULL,20);  
+INSERT INTO emp VALUES (7839,'KING','PRESIDENT',NULL,str_to_date('17-11-1981','%d-%m-%Y'),5000,NULL,10);  
+INSERT INTO emp VALUES (7844,'TURNER','SALESMAN',7698,str_to_date('8-9-1981','%d-%m-%Y'),1500,0,30);  
+INSERT INTO emp VALUES (7876,'ADAMS','CLERK',7788,str_to_date('23-05-1987','%d-%m-%Y'),1100,NULL,20);  
+INSERT INTO emp VALUES (7900,'JAMES','CLERK',7698,str_to_date('3-12-1981','%d-%m-%Y'),950,NULL,30);  
+INSERT INTO emp VALUES (7902,'FORD','ANALYST',7566,str_to_date('3-12-1981','%d-%m-%Y'),3000,NULL,20);  
+INSERT INTO emp VALUES (7934,'MILLER','CLERK',7782,str_to_date('23-1-1982','%d-%m-%Y'),1300,NULL,10);  
+  
+-- 插入测试数据 —— salgrade  
+INSERT INTO salgrade VALUES (1,700,1200);  
+INSERT INTO salgrade VALUES (2,1201,1400);  
+INSERT INTO salgrade VALUES (3,1401,2000);  
+INSERT INTO salgrade VALUES (4,2001,3000);  
+INSERT INTO salgrade VALUES (5,3001,9999);  
+
+-- 事务提交  
+COMMIT;  
+  
+```
+**删除**
+```sql
+delete from student; -- 删除所有数据
+-- 根据条件删除
+delete from student where code = 1114;
+delete from student where name = '李四';
+```
+**修改**
+
+```sql
+-- 给所有员工工资涨10%
+update emp set sal=sal*1.1;
+-- 修改特定学生的信息
+update student set name='张三',sex='女' where code=1112;
+```
+**查询**
+```sql
+use mydb;
+-- 查询第1，3，6，9条员工数据
+set @rownum=0;
+select * from (select @rownum:=@rownum+1 序号,ename,job from emp)t where t.序号 in(1,3,6,9);
+select * from emp where job='CLERK' and sal>1000;
+select ename 姓名,sal *12 年收入 ,job 职务 from emp where sal between 1000 and 4000 and(job=
+'SALESMAN' or job='CLERK');
+select ename 姓名,sal * 12 年收入,job 职务 from  emp where sal between 1000 and 4000
+and job in ('SALESMAN','CLERK');
+-- 查询姓s的员工 模糊查询
+select * from emp where ename like 's%'
+-- 假设每一页数据有两条，我想查第二页员工数据
+select * from emp;
+-- 两条一页 第一条为0第三页就是4，2
+select * from emp limit 4,2;
+-- 查询工资大于98年后入职任意员工工资的员工数据
+select * from emp where sal >any(select sal from emp where hiredate > str_to_date('1983-0-1','%Y-%m-%d'));
+select * from emp where hiredate > str_to_date('1983-0-1','%y-%m-%d');
+-- 查询员工数据（81-87）
+select * from emp where hiredate between str_to_date('1981-0-0','%Y-%m-%d')and 
+str_to_date('1987-0-0','%Y-%m-%d');
+select CONCAT('最大值',max(sal),'人民币') from emp;
+select min(sal) from emp;
+-- 平均值
+select avg(sal) from emp;
+-- 求和
+select sum(sal) from emp;
+-- 记录数
+select count(*) from emp;
+-- 查询各部门员工的平均年收入,只有分组的列可以出现在select后面
+select deptno,avg(sal + COALESCE(comm,0)) 平均年收入 from emp group by deptno;
+-- 查询不同职务的员工的总收入
+select job, sum((sal + COALESCE(comm,0)) * 12) 总年收入 from emp group by job;
+-- 查询各部门下各职务员工的平均年收入
+select deptno,job,avg((sal + COALESCE(comm,0))*12) 平均年收入 from emp group by deptno,job;
+-- 查询10，20部门下各职员员工的平均年收入
+use mydb;
+select deptno,job,avg((sal + COALESCE(comm,0))*12) 平均年收入 from emp 
+where deptno in(10,20) group by deptno,job;
+-- 排序
+-- 按收入排序
+select * from emp order by sal + COALESCE(COMM,0);
+-- 多条件，先按收入排，同收入按入职日期排，默认升序
+select *  from emp order by sal + COALESCE(COMM,0),hiredate;
+-- 降序
+select * from emp order by sal + COALESCE(COMM,0) desc;
+select * from emp,dept;
+-- 等值连接 86标准
+select * from emp,dept where emp.deptno =dept.deptno;
+-- 删除相同的 要加约束
+select emp.empno,emp.ename,emp.job,emp.mgr,emp.hiredate,emp.sal,emp.comm,emp.deptno,dept.dname,
+dept.loc from emp,dept where emp.deptno =dept.deptno;
+-- 等值连接 92标准（推荐）
+select e.ename,e.job,e.sal,e.comm,d.dname,d.loc from emp e join dept d on 
+e.deptno=d.deptno;
+--
+select * from dept;
+select * from salgrade;
+-- 非等值连接
+-- 查询员工姓名，收入信息及工资等级
+select e.ename,e.sal,s.grade,s.losal,s.hisal from emp e join salgrade s
+on e.sal between s.losal and s.hisal;
+-- 查询员工姓名,经理也用姓名
+select empno,ename,mgr from emp;
+select e.empno,e.ename,e.mgr 经理编号,el.ename 经理姓名 from emp e join emp el
+on e.mgr=el.empno;
+-- 查询员工姓名，收入信息及其工资的等级及员工经理姓名
+select e.ename,e.sal,el.ename,s.grade from emp e join salgrade s join emp el
+on (e.sal between s.losal and s.hisal)and e.mgr = el.empno;
+select e.ename,e.sal,el.ename,s.grade from emp e join salgrade s on e.sal
+between s.losal and s.hisal join emp el on e.mgr =el.empno;
+-- 外连接
+--查询员工姓名，收入信息及其工资的所有等级（即便工资等级没有员工也要列）
+select e.ename,e.sal,s.grade from emp e inner join salgrade s on 
+e.sal between s.losal and s.hisal;
+select e.ename,e.sal,s.grade from emp e right outer join salgrade s on 
+e.sal between s.losal and s.hisal; 
+-- 左外
+select e.ename,e.sal,s.grade from salgrade s left join emp e
+on e.sal between s.losal and s.hisal;
+
+```
